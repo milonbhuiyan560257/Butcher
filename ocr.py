@@ -1,29 +1,45 @@
-import re
+# ocr.py
+
+import os
+from parser import VoucherParser
+
 
 class OCRReader:
 
     def __init__(self):
-        pass
+        self.parser = VoucherParser()
 
-    def process_text(self, text):
+    def extract_text(self, image_path):
+        """
+        এখানে ভবিষ্যতে OCR Engine (ML Kit / Tesseract / অন্য কিছু)
+        থেকে টেক্সট নেওয়া হবে।
 
-        result = {
-            "name": "",
-            "voucher": "",
-            "amount": ""
-        }
+        বর্তমানে এটি ডেমো হিসেবে একটি নমুনা টেক্সট ফেরত দিচ্ছে।
+        """
 
-        for line in text.splitlines():
+        if not os.path.exists(image_path):
+            return ""
 
-            line = line.strip()
+        demo_text = """
+        Name: Rahim Uddin
+        Voucher: V-10258
+        Amount: 1500
+        Date: 01/08/2026
+        Mobile: 01712345678
+        """
 
-            if line.lower().startswith("name"):
-                result["name"] = line.split(":", 1)[-1].strip()
+        return demo_text
 
-            elif "voucher" in line.lower():
-                result["voucher"] = line.split(":", 1)[-1].strip()
+    def process_image(self, image_path):
+        """
+        ছবি → টেক্সট → parser.py → Dictionary
+        """
 
-            elif "amount" in line.lower():
-                result["amount"] = re.sub(r"[^0-9.]", "", line)
+        text = self.extract_text(image_path)
 
-        return result
+        if not text:
+            return None
+
+        data = self.parser.parse(text)
+
+        return data
