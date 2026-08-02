@@ -10,7 +10,7 @@ from kivy.core.window import Window
 from camera import CameraManager
 from excel import ExcelManager
 from ocr import OCRReader
-from parser import VoucherParser
+from voucher_parser import VoucherParser
 
 from datetime import datetime
 import os
