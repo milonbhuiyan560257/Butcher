@@ -1,5 +1,5 @@
 """
-OCR Module - Android compatible version
+OCR Module - Android Compatible
 """
 
 import os
@@ -13,7 +13,6 @@ class OCRReader:
     def extract_text(self, image_path):
         if not os.path.exists(image_path):
             return ""
-
         return self._demo_text()
 
     def _demo_text(self):
@@ -24,11 +23,9 @@ Date: 01/08/2026
 Mobile: 01712345678"""
 
     def process_image(self, image_path):
-        from parser import VoucherParser
-
+        from voucher_parser import VoucherParser
         text = self.extract_text(image_path)
         if not text:
             return None
-
         parser = VoucherParser()
         return parser.parse(text)
