@@ -10,9 +10,9 @@ requirements = python3,kivy,pillow
 orientation = portrait
 fullscreen = 0
 android.permissions = CAMERA,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
-android.api = 33
-android.minapi = 21
-android.archs = armeabi-v7a
+android.api = 34
+android.minapi = 24
+android.archs = arm64-v8a
 android.accept_sdk_license = True
 log_level = 2
 
