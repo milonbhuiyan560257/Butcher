@@ -4,9 +4,9 @@ title = Voucher Scanner
 package.name = voucherscanner
 package.domain = org.milonbhuiyan
 source.dir = .
-source.include_exts = py,png,jpg,jpeg,kv,atlas,ttf,json,txt
+source.include_exts = py,png,jpg,jpeg,kv,atlas,ttf,json,txt,csv
 version = 1.0.0
-requirements = python3,kivy,pillow,openpyxl
+requirements = python3,kivy==2.2.1,pillow
 orientation = portrait
 fullscreen = 0
 android.permissions = CAMERA,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
