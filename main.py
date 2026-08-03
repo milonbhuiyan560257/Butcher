@@ -24,7 +24,6 @@ class VoucherScanner(BoxLayout):
         self.csv_file = "vouchers.csv"
         self._ensure_csv()
 
-        # Title
         self.add_widget(Label(
             text="[b]VOUCHER SCANNER[/b]",
             markup=True,
@@ -33,12 +32,10 @@ class VoucherScanner(BoxLayout):
             font_size="20sp"
         ))
 
-        # Camera (stopped initially to prevent Android crash)
         self.camera = Camera(play=False, resolution=(640, 480))
-        self.camera.size_hint = (1, 0.28)
+        self.camera.size_hint = (1, 0.26)
         self.add_widget(self.camera)
 
-        # Status
         self.status = Label(
             text="Tap 'Start Camera'",
             size_hint=(1, 0.05),
@@ -48,7 +45,6 @@ class VoucherScanner(BoxLayout):
         )
         self.add_widget(self.status)
 
-        # Input Fields
         self.name = TextInput(hint_text="Child Name", multiline=False, size_hint=(1, 0.07), font_size="15sp")
         self.add_widget(self.name)
 
@@ -61,8 +57,7 @@ class VoucherScanner(BoxLayout):
         self.mobile = TextInput(hint_text="Mobile Number", multiline=False, size_hint=(1, 0.07), font_size="15sp")
         self.add_widget(self.mobile)
 
-        # Buttons
-        btn_grid = GridLayout(cols=2, size_hint=(1, 0.22), spacing=8)
+        btn_grid = GridLayout(cols=2, size_hint=(1, 0.24), spacing=8)
 
         btn_start = Button(text="[b]Start Cam[/b]", markup=True, background_color=(0.2, 0.5, 0.9, 1), color=(1,1,1,1), font_size="14sp")
         btn_start.bind(on_press=self.start_cam)
@@ -90,19 +85,17 @@ class VoucherScanner(BoxLayout):
 
         self.add_widget(btn_grid)
 
-        # Entry Count
         self.entries_label = Label(text="Total Entries: 0", size_hint=(1, 0.05), color=(0.5, 0.5, 0.5, 1), font_size="13sp")
         self.add_widget(self.entries_label)
         self.update_count()
 
-        # Data display
         self.data_label = Label(
-            text="", size_hint=(1, None), height=150,
+            text="", size_hint=(1, None), height=120,
             color=(0.8, 0.8, 0.8, 1), font_size="12sp",
             markup=True, halign="left", valign="top"
         )
         self.data_label.bind(width=lambda *x: self.data_label.setter('text_size')(self.data_label, (self.data_label.width, None)))
-        scroll = ScrollView(size_hint=(1, 0.18))
+        scroll = ScrollView(size_hint=(1, 0.14))
         scroll.add_widget(self.data_label)
         self.add_widget(scroll)
 
@@ -115,42 +108,34 @@ class VoucherScanner(BoxLayout):
     def start_cam(self, instance):
         try:
             self.camera.play = True
-            self.status.text = "Camera ON - Show voucher"
+            self.status.text = "Camera ON"
         except Exception as e:
-            self.status.text = "Camera error"
+            self.status.text = "Camera failed"
 
     def capture_and_scan(self, instance):
-        """Capture photo and run OCR demo"""
         try:
             os.makedirs("captures", exist_ok=True)
             fname = datetime.now().strftime("%Y%m%d_%H%M%S.png")
             fpath = os.path.join("captures", fname)
             self.camera.export_to_png(fpath)
             self.camera.play = False
-            self.status.text = "Photo captured! Scanning..."
-            
-            # Run OCR after short delay
+            self.status.text = "Scanning..."
             Clock.schedule_once(lambda dt: self._run_ocr_demo(), 0.5)
         except Exception as e:
-            self.status.text = f"Capture failed: {str(e)[:25]}"
+            self.status.text = "Capture failed"
             Clock.schedule_once(lambda dt: setattr(self.status, 'text', "Ready"), 3)
 
     def _run_ocr_demo(self):
-        """Demo OCR - extracts realistic voucher data"""
-        # Generate realistic demo data
         vouchers = ["V-10258", "V-20491", "V-31572", "V-44830", "V-56129"]
         names = ["Rahim Uddin", "Karim Ali", "Salma Begum", "Jamal Hossain", "Fatima Khatun"]
         amounts = ["1500", "2200", "850", "3000", "1750"]
         mobiles = ["01712345678", "01898765432", "01611223344", "01955667788", "01599887766"]
-        
         idx = random.randint(0, 4)
-        
         self.name.text = names[idx]
         self.voucher.text = vouchers[idx]
         self.amount.text = amounts[idx]
         self.mobile.text = mobiles[idx]
-        
-        self.status.text = "Scanned! Edit if needed & Save"
+        self.status.text = "Scanned! Edit & Save"
         Clock.schedule_once(lambda dt: setattr(self.status, 'text', "Ready"), 4)
 
     def demo_fill(self, instance):
@@ -162,16 +147,9 @@ class VoucherScanner(BoxLayout):
         Clock.schedule_once(lambda dt: setattr(self.status, 'text', "Ready"), 2)
 
     def save(self, instance):
-        if not self.name.text.strip():
-            self.status.text = "Enter name!"
+        if not self.name.text.strip() or not self.voucher.text.strip() or not self.amount.text.strip():
+            self.status.text = "Fill required!"
             return
-        if not self.voucher.text.strip():
-            self.status.text = "Enter voucher!"
-            return
-        if not self.amount.text.strip():
-            self.status.text = "Enter amount!"
-            return
-
         try:
             now = datetime.now()
             with open(self.csv_file, "a", newline="", encoding="utf-8") as f:
@@ -184,11 +162,11 @@ class VoucherScanner(BoxLayout):
                     now.strftime("%Y-%m-%d"),
                     now.strftime("%H:%M:%S")
                 ])
-            self.status.text = "Saved to CSV!"
+            self.status.text = "Saved!"
             self.clear(None)
             self.update_count()
         except Exception as e:
-            self.status.text = f"Error: {str(e)[:25]}"
+            self.status.text = "Save error"
         Clock.schedule_once(lambda dt: setattr(self.status, 'text', "Ready"), 3)
 
     def clear(self, instance):
@@ -212,12 +190,12 @@ class VoucherScanner(BoxLayout):
                         rows.append(f"{i}. {row[0]} | {row[1]} | Tk{row[2]}")
             if rows:
                 self.data_label.text = "\n".join(rows[-8:])
-                self.status.text = f"Total: {len(rows)} records"
+                self.status.text = f"Total: {len(rows)}"
             else:
                 self.data_label.text = "No records"
                 self.status.text = "No data"
-        except Exception as e:
-            self.data_label.text = "Error loading"
+        except:
+            self.data_label.text = "Error"
             self.status.text = "Error"
         Clock.schedule_once(lambda dt: setattr(self.status, 'text', "Ready"), 3)
 
