@@ -1,109 +1,35 @@
-name: Build Android APK
+name: Android CI - Auto Build APK
 
 on:
   push:
-    branches:
-      - main
-      - master
+    branches: [ "main" ]
   pull_request:
-    branches:
-      - main
-      - master
-  workflow_dispatch:
+    branches: [ "main" ]
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 120
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
+    - name: Grant Execute Permission for Gradle
+      run: chmod +x gradlew
 
-      - name: Cache Buildozer & Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.buildozer
-            ~/.gradle
-            ~/.android
-          key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-buildozer-
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug
 
-      - name: Install Linux Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            git \
-            zip \
-            unzip \
-            openjdk-17-jdk \
-            autoconf \
-            automake \
-            libtool \
-            pkg-config \
-            zlib1g-dev \
-            libncurses5-dev \
-            libncursesw5-dev \
-            libtinfo5 \
-            cmake \
-            libffi-dev \
-            libssl-dev \
-            build-essential \
-            ccache \
-            liblzma-dev \
-            libsqlite3-dev \
-            libjpeg-dev \
-            libpng-dev \
-            libfreetype6-dev \
-            python3-dev \
-            tesseract-ocr \
-            tesseract-ocr-ben \
-            libtesseract-dev
-
-      - name: Install Python Packages
-        run: |
-          python -m pip install --upgrade pip
-          pip install "cython<3.0"
-          pip install "buildozer>=1.5.0"
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          fi
-
-      - name: Accept Android Licenses
-        run: |
-          mkdir -p ~/.android
-          touch ~/.android/repositories.cfg
-          yes | sdkmanager --licenses || true
-
-      - name: Build Debug APK
-        run: |
-          buildozer android debug
-
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: VoucherScanner-APK
-          path: |
-            bin/*.apk
-          retention-days: 30
-
-      - name: Show Build Output
-        if: failure()
-        run: |
-          echo "=== Buildozer Log ==="
-          cat ~/.buildozer/android/platform/build-*/build.log 2>/dev/null || true
-          echo "=== APK Directory ==="
-          ls -la bin/ 2>/dev/null || true
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug-apk
+        path: app/build/outputs/apk/debug/app-debug.apk
+        
